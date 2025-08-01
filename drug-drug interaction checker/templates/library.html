@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drug Interaction History - Library</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Poppins:wght@400;500&display=swap');
+        
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: #1a1919;
+            color: white;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.25;
+        }
+
+        .library-container {
+            position: relative;
+            z-index: 1;
+            max-width: 1000px;
+            width: 90%;
+            margin: 0 auto;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .library-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 1rem;
+            border-bottom: 2px solid var(--secondary-color);
+        }
+
+        .library-header h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.8rem;
+            line-height: 1.2;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(45deg, #4ec3c9, #b5eef0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .library-header p {
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-color);
+            font-size: 1.2rem;
+        }
+
+        .no-history {
+            text-align: center;
+            padding: 2rem;
+            font-family: 'Poppins', sans-serif;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.2rem;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 1rem;
+            background: linear-gradient(45deg, var(--secondary-color), var(--accent-color));
+            color: var(--primary-color);
+            text-decoration: none;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: transform 0.3s ease;
+            width: 200px;
+            text-align: center;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(78, 195, 201, 0.3);
+        }
+
+        .back-button:active {
+            transform: translateY(0);
+        }
+
+        #history-container {
+            display: grid;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            padding: 5px;
+            font-size: 1.2rem;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="library-container">
+        <div class="library-header">
+            <h1>Interaction History</h1>
+            <p>Your last 5 drug interaction checks</p>
+        </div>
+        
+        <div id="history-container">
+            <!-- History items will be displayed here -->
+        </div>
+
+        <div style="text-align: center;">
+            <a href="/index" class="back-button" style="margin-top: 40px; padding: 10px 20px; background-color: #007bff; color: rgb(255, 255, 255); text-decoration: none; border-radius: 4px; width: 200px; height: 40px; font-family: 'Poppins', sans-serif; display: flex; align-items: center; justify-content: center; margin-left: auto; margin-right: auto;">Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const mouse = { x: null, y: null };
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        class Node {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 1;
+                this.vy = (Math.random() - 0.5) * 1;
+                this.radius = Math.random() * 4 + 2;
+            }
+
+            update() {
+                if (this.x < 0 || this.x > canvas.width) this.vx = -this.vx;
+                if (this.y < 0 || this.y > canvas.height) this.vy = -this.vy;
+                
+                this.x += this.vx;
+                this.y += this.vy;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#888';
+                ctx.fill();
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#aaa';
+            }
+        }
+
+        const nodes = Array.from({ length: 120 }, () => new Node());
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.shadowBlur = 0;
+
+            nodes.forEach((nodeA, i) => {
+                nodes.slice(i + 1).forEach(nodeB => {
+                    const dx = nodeA.x - nodeB.x;
+                    const dy = nodeA.y - nodeB.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 250) {
+                        ctx.beginPath();
+                        ctx.moveTo(nodeA.x, nodeA.y);
+                        ctx.lineTo(nodeB.x, nodeB.y);
+                        
+                        const opacity = 1 - (distance / 250);
+                        const gradient = ctx.createLinearGradient(nodeA.x, nodeA.y, nodeB.x, nodeB.y);
+                        gradient.addColorStop(0, `rgba(136, 136, 136, ${opacity * 0.8})`);
+                        gradient.addColorStop(1, `rgba(170, 170, 170, ${opacity * 0.8})`);
+                        
+                        ctx.strokeStyle = gradient;
+                        ctx.lineWidth = 2.5;
+                        ctx.stroke();
+                    }
+                });
+            });
+
+            nodes.forEach(node => {
+                node.update();
+                node.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        canvas.addEventListener('mousemove', (event) => {
+            mouse.x = event.x;
+            mouse.y = event.y;
+
+            nodes.forEach(node => {
+                const dx = mouse.x - node.x;
+                const dy = mouse.y - node.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < 250) {
+                    const angle = Math.atan2(dy, dx);
+                    const force = (250 - distance) / 250;
+                    node.vx -= Math.cos(angle) * force * 1.5;
+                    node.vy -= Math.sin(angle) * force * 1.5;
+                    
+                    if (distance < 100) {
+                        ctx.beginPath();
+                        ctx.moveTo(mouse.x, mouse.y);
+                        ctx.lineTo(node.x, node.y);
+                        ctx.strokeStyle = `rgba(136, 136, 136, 0.2)`;
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+                }
+            });
+        });
+
+        function deleteInteraction(index) {
+            if (confirm('Are you sure you want to delete this interaction record?')) {
+                let history = JSON.parse(localStorage.getItem('drugInteractionHistory') || '[]');
+                history.splice(index, 1);
+                localStorage.setItem('drugInteractionHistory', JSON.stringify(history));
+                displayHistory();
+            }
+        }
+
+        function displayHistory() {
+            const historyContainer = document.getElementById('history-container');
+            const history = JSON.parse(localStorage.getItem('drugInteractionHistory') || '[]');
+            
+            if (history.length === 0) {
+                historyContainer.innerHTML = '<div class="no-history">No interaction history available</div>';
+                return;
+            }
+            
+            historyContainer.innerHTML = '';
+            
+            history.forEach((interaction, index) => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                historyItem.innerHTML = `
+                    <div class="history-header">
+                        <div class="header-left">
+                            <span class="history-number">#${index + 1}</span>
+                            <span class="history-date">${interaction.timestamp}</span>
+                        </div>
+                        <button class="delete-btn" onclick="deleteInteraction(${index})" title="Delete this record">
+                            ×
+                        </button>
+                    </div>
+                    <div class="history-content">
+                        <div class="drug-details">
+                            <h4>Drug 1</h4>
+                            <p>CYP3A4: ${interaction.drug1.cyp3a4}</p>
+                            <p>Binding Affinity: ${interaction.drug1.bindingAffinity}</p>
+                            <p>Renal Clearance: ${interaction.drug1.renalClearance}</p>
+                            <p>LogP: ${interaction.drug1.logp}</p>
+                        </div>
+                        <div class="drug-details">
+                            <h4>Drug 2</h4>
+                            <p>CYP3A4: ${interaction.drug2.cyp3a4}</p>
+                            <p>Binding Affinity: ${interaction.drug2.bindingAffinity}</p>
+                            <p>Renal Clearance: ${interaction.drug2.renalClearance}</p>
+                            <p>LogP: ${interaction.drug2.logp}</p>
+                        </div>
+                    </div>
+                    <div class="history-result">
+                        <strong>Result:</strong> ${interaction.result}
+                    </div>
+                `;
+                historyContainer.appendChild(historyItem);
+            });
+        }
+
+        // Load history when page loads
+        document.addEventListener('DOMContentLoaded', displayHistory);
+    </script>
+</body>
+</html> 

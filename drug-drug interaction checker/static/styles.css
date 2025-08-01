@@ -1,0 +1,305 @@
+:root {
+    --primary-color: #1a1919;
+    --secondary-color: #4ec3c9;
+    --accent-color: #b5eef0;
+    --text-color: #ffffff;
+    --section-bg: #3A3B3C;
+    --transition: all 0.3s ease;
+    --fallback-font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 
+                     Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 
+                     'Helvetica Neue', sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: var(--fallback-font);
+    background: linear-gradient(135deg, var(--primary-color), #1a2a3a);
+    background: -webkit-linear-gradient(135deg, var(--primary-color), #1a2a3a);
+    background: -moz-linear-gradient(135deg, var(--primary-color), #1a2a3a);
+    color: var(--text-color);
+    line-height: 1.6;
+    min-height: 100vh;
+    background-color: var(--primary-color);
+}
+
+.container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+@supports not (backdrop-filter: blur(10px)) {
+    .container {
+        background: rgba(255, 255, 255, 0.15);
+    }
+}
+
+header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    border-bottom: 2px solid var(--secondary-color);
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(45deg, var(--secondary-color), var(--accent-color));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+
+
+
+nav {
+    margin: 2rem 0;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+}
+
+nav a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    transition: var(--transition);
+}
+
+nav a:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+.section {
+    background-color: var(--section-bg);
+    padding: 2rem;
+    border-radius: 10px;
+    margin: 1rem 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: var(--transition);
+}
+
+.section:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 0.8rem;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-color);
+    transition: var(--transition);
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.btn {
+    font-family: 'Poppins', sans-serif;
+    padding: 0.8rem;
+    margin-top: 0.5rem;
+    background-color: #5cb85c;
+    border: none;
+    border-radius: 0.25rem;
+    color: white;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn:hover {
+    background-color: #4CAF50;
+}
+
+.result {
+    margin-top: 2rem;
+    padding: 1rem;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: var(--transition);
+}
+
+.hidden {
+    display: none;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.visible {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#history-container {
+    display: grid;
+    gap: 1rem;
+}
+
+.history-item {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: transform 0.3s ease;
+}
+
+.history-item:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.history-number {
+    font-weight: bold;
+    color: var(--secondary-color);
+}
+
+.history-date {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9em;
+}
+
+.history-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+.drug-details h4 {
+    color: var(--secondary-color);
+    margin-bottom: 8px;
+}
+
+.drug-details p {
+    margin: 4px 0;
+    font-size: 0.9em;
+}
+
+.history-result {
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* New styles for side-by-side drug containers */
+.drugs-wrapper {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+.drug-container {
+    flex: 1;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    border-radius: 10px;
+}
+
+@media screen and (max-width: 1024px) {
+    .container {
+        max-width: 90%;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .container {
+        margin: 1rem;
+        padding: 1rem;
+    }
+
+    nav ul {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    /* Adjust drugs wrapper for mobile */
+    .drugs-wrapper {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+.btn {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(45deg, var(--secondary-color), var(--accent-color));
+    border: none;
+    border-radius: 8px;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    margin-top: 2rem; /* Added margin to create more space */
+}
+
+@media screen and (max-width: 480px) {
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    .section {
+        padding: 1rem;
+    }
+}
+
+@media print {
+    body {
+        background: none;
+        color: #000;
+    }
+
+    .container {
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .btn {
+        display: none;
+    }
+}
+

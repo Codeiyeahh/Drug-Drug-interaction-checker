@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Drug Interaction Checker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Poppins:wght@400;500&display=swap');
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1a1919;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 3.5rem;
+            line-height: 1.2;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(45deg, #4ec3c9, #b5eef0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        p {
+            font-size: 1.5rem;
+        }
+
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 2s ease-in forwards;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.25;
+        }
+
+        .love-text {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem;
+            color: #ffffff;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+        }
+
+        .name-text {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.4rem;
+            color: #ffffff;
+            font-weight: 400;
+            margin: 0.5rem 0;
+            letter-spacing: 0.5px;
+            transition: color 0.3s ease;
+        }
+
+        .name-text:hover {
+            color: #b5eef0;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <h1 class="fade-in">About Us</h1>
+    <p class="fade-in love-text" style="animation-delay: 0.5s;">Made by</p>
+    <div style="display: inline-block;">
+        <p class="fade-in name-text" style="animation-delay: 1s;">1) Ojasvi Sahu (23BHI10120)</p>
+        <p class="fade-in name-text" style="animation-delay: 1.5s;">2) Dev Naik (23BHI10131)</p>
+        <p class="fade-in name-text" style="animation-delay: 2s;">3) Meshwa Hirpara (23BHI10090)</p>
+        <p class="fade-in name-text" style="animation-delay: 2.5s;">4) Prerna (23BHI10139)</p>
+        <p class="fade-in name-text" style="animation-delay: 3.0s;">5) Prashasti Satapathi(23BHI10059)</p>
+    </div>
+    <a href="/index" class="btn" style="display: block; width: 200px; margin: 20px auto; background-color: #007bff; font-family: 'Poppins', sans-serif; padding: 8px 16px; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 14px; transition: all 0.3s ease; text-align: center; text-decoration: none;">Back to Home</a>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const mouse = { x: null, y: null };
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        class Node {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 1;
+                this.vy = (Math.random() - 0.5) * 1;
+                this.radius = Math.random() * 4 + 2;
+            }
+
+            update() {
+                if (this.x < 0 || this.x > canvas.width) this.vx = -this.vx;
+                if (this.y < 0 || this.y > canvas.height) this.vy = -this.vy;
+                
+                this.x += this.vx;
+                this.y += this.vy;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#888';
+                ctx.fill();
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#aaa';
+            }
+        }
+
+        const nodes = Array.from({ length: 120 }, () => new Node());
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.shadowBlur = 0;
+
+            nodes.forEach((nodeA, i) => {
+                nodes.slice(i + 1).forEach(nodeB => {
+                    const dx = nodeA.x - nodeB.x;
+                    const dy = nodeA.y - nodeB.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 250) {
+                        ctx.beginPath();
+                        ctx.moveTo(nodeA.x, nodeA.y);
+                        ctx.lineTo(nodeB.x, nodeB.y);
+                        
+                        const opacity = 1 - (distance / 250);
+                        const gradient = ctx.createLinearGradient(nodeA.x, nodeA.y, nodeB.x, nodeB.y);
+                        gradient.addColorStop(0, `rgba(136, 136, 136, ${opacity * 0.8})`);
+                        gradient.addColorStop(1, `rgba(170, 170, 170, ${opacity * 0.8})`);
+                        
+                        ctx.strokeStyle = gradient;
+                        ctx.lineWidth = 2.5;
+                        ctx.stroke();
+                    }
+                });
+            });
+
+            nodes.forEach(node => {
+                node.update();
+                node.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        canvas.addEventListener('mousemove', (event) => {
+            mouse.x = event.x;
+            mouse.y = event.y;
+
+            nodes.forEach(node => {
+                const dx = mouse.x - node.x;
+                const dy = mouse.y - node.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < 250) {
+                    const angle = Math.atan2(dy, dx);
+                    const force = (250 - distance) / 250;
+                    node.vx -= Math.cos(angle) * force * 1.5;
+                    node.vy -= Math.sin(angle) * force * 1.5;
+                    
+                    if (distance < 100) {
+                        ctx.beginPath();
+                        ctx.moveTo(mouse.x, mouse.y);
+                        ctx.lineTo(node.x, node.y);
+                        ctx.strokeStyle = `rgba(136, 136, 136, 0.2)`;
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

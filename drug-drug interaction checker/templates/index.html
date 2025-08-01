@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drug Interaction Checker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Poppins:wght@400;500&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #1a1919; /* Dark Blue Gray background */
+            color: white; /* White text */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh; /* Full viewport height */
+            margin: 0; /* Remove default margin */
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.25; /* Background canvas opacity */
+        }
+
+        /* Container adjustments */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-height: 90vh;
+            overflow-y: auto;
+            margin: 20px auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        /* Header adjustments */
+        header {
+            margin-bottom: 15px;
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            line-height: 1.2;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(45deg, #4ec3c9, #b5eef0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+        }
+
+        header p {
+            font-size: 0.9rem;
+            margin: 5px 0;
+        }
+
+        /* Navigation adjustments */
+        nav ul {
+            list-style: none;
+            padding: 5px 0;
+            margin: 10px 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        nav ul li a {
+            font-family: 'Poppins', sans-serif;
+            font-weight: normal; /* Ensure text is not bold */
+            color: white; 
+            text-decoration: none; 
+            padding: 5px 10px; 
+            border-radius: 5px; 
+            transition: background-color 0.3s; 
+        }
+
+        nav ul li a:hover {
+           background-color: rgba(255, 255, 255, 0.1); 
+       }
+
+       /* Form adjustments */
+       .drugs-wrapper {
+           display: flex; 
+           justify-content: space-between; 
+           margin-bottom: 20px; 
+       }
+
+       .drug-container {
+           flex-basis: calc(50% - 10px); /* Adjusts width to allow spacing */
+           padding-right:10px; /* Space between drug containers */
+           background-color:#2a2a2a; /* Darker background for parameter container */
+           padding:15px; /* Padding inside the drug container */
+           border-radius:.5rem; /* Rounded corners for container */
+       }
+
+       .form-group { 
+           margin-bottom: 15px; 
+       }
+
+       .form-group label { 
+           font-family:'Poppins', sans-serif; 
+           font-size:.95rem; 
+           font-weight:bold; 
+           display:block; /* Ensure label takes full width */
+           margin-bottom:.5rem; /* Space between label and input */
+       }
+
+       .form-group input { 
+           padding:.5rem; 
+           width:auto; 
+           background-color:#ffffff26; /* Semi-transparent input background */
+           border:none; 
+           border-radius:.25rem; 
+           color:white; 
+           width: calc(100% - .5rem); /* Full width minus padding */
+           border-bottom-width :1px ; /* Default bottom border width*/
+           border-bottom-color :rgba(255,255,255,.2) ;/* Default bottom border color*/
+           transition:border-color .3s ease-in-out; /* Smooth transition for border color */
+       }
+
+       .form-group input:hover,
+       .form-group input:focus {
+           outline:none; /* Remove default outline on focus and hover */
+           border:none; /* Remove default border on focus and hover */
+           border-bottom-width :2px ; /* Add bottom border on focus and hover*/
+           border-bottom-color:#b5eef0 ; /* Highlight bottom border color on focus and hover*/
+       }
+
+       /* Button adjustments */
+    .btn {
+    font-family: 'Poppins', sans-serif;
+    padding: 0.8rem;
+    margin-top: 0.5rem;
+    background-color: #5cb85c;
+    border: none;
+    border-radius: 0.25rem;
+    color: white;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn:hover {
+    background-color: #81fffb;
+}
+
+       /* Result section */
+       #result { 
+          margin-top:.5rem ; 
+          display:none ; /* Initially hidden */  
+       }
+       
+       button.btn:hover {
+           background-color: #a3e4f0; /* Darker blue on hover */
+           transform: translateY(-2px); /* Slight lift effect */
+           box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow effect */
+       }
+       
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div class="container">
+        <header>
+            <h1>Drug Interaction Checker</h1>
+        </header>
+        <main>
+             <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/library">Library</a></li>
+                    <li><a href="#Samples">Samples</a></li>
+                    <li><a href="/about">About</a></li>
+                </ul>
+             </nav>
+
+             <section id="home" class="section">
+                 <h2>Check Drug Interaction</h2>
+                 <form id="interaction-form">
+                     <div class="drugs-wrapper">
+                         <div class="drug-container">
+                             <h3>Drug 1 Parameters</h3>
+                             <div class="form-group">
+                                 <label for="drug1_cyp3a4">CYP4A4 Enzyme Type:</label>
+                                 <input type="text" id="drug1_cyp3a4" name="drug1_cyp3a4" required>
+                             </div>
+                             <div class="form-group">
+                                 <label for="drug1_binding_affinity">Binding Affinity:</label>
+                                 <input type="text" id="drug1_binding_affinity" name="drug1_binding_affinity" required>
+                             </div>
+                             <div class="form-group">
+                                 <label for="drug1_renal_clearance">Renal Clearance:</label>
+                                 <input type="text" id="drug1_renal_clearance" name="drug1_renal_clearance" required>
+                             </div>
+                             <div class="form-group">
+                                 <label for="drug1_logp">LogP:</label>
+                                 <input type="text" id="drug1_logp" name="drug1_logp" required>
+                             </div>
+                         </div>
+
+                         <div class="drug-container">
+                             <h3>Drug 2 Parameters</h3>
+                             <div class="form-group">
+                                 <label for="drug2_cyp3a4">CYP4A4 Enzyme Type:</label>
+                                 <input type="text" id="drug2_cyp3a4" name="drug2_cyp3a4" required>
+                             </div>
+                             <div class="form-group">
+                                 <label for="drug2_binding_affinity">Binding Affinity:</label>
+                                 <input type="text" id="drug2_binding_affinity" name="drug2_binding_affinity" required>
+                             </div>
+                             <div class="form-group">
+                                 <label for="drug2_renal_clearance">Renal Clearance:</label>
+                                 <input type="text" id="drug2_renal_clearance" name="drug2_renal_clearance" required>
+                             </div>
+                             <div class="form-group">
+                                 <label for="drug2_logp">LogP:</label>
+                                 <input type="text" id="drug2_logp" name="drug2_logp" required>
+                             </div>
+                         </div>
+
+                     </div>
+
+                     <!-- Button to submit the form -->
+                     <button type="submit" class="btn" style="display: block; width: 200px; margin: 20px auto; background-color: #007bff; font-family: 'Poppins', sans-serif; padding: 8px 16px; border: none; border-radius: 4px; color: white; cursor: pointer; font-size: 14px; transition: all 0.3s ease;">Check Interaction</button>
+
+                 </form>
+
+                 <!-- Result section -->
+                 <div id="result">
+                     <h3>Interaction Result</h3>  
+                     <p id="interaction-description"></p>  
+                 </div>
+
+             </section>
+
+         </main>
+
+     </div>
+
+     <!-- JavaScript for Canvas Animation -->
+     <script>  
+         const canvas = document.getElementById('canvas');  
+         const ctx = canvas.getContext('2d');  
+         const mouse = { x:null,y:null };  
+
+         canvas.width = window.innerWidth;  
+         canvas.height = window.innerHeight;
+
+         window.addEventListener('resize', () => {  
+             canvas.width = window.innerWidth;  
+             canvas.height = window.innerHeight;  
+         });
+
+         class Node {  
+             constructor() {  
+                 this.x = Math.random() * canvas.width;  
+                 this.y = Math.random() * canvas.height;  
+                 this.vx = (Math.random() - .5) * .5 ; // Slower movement
+                 this.vy = (Math.random() - .5) * .5 ; // Slower movement
+                 this.radius = Math.random() *4 +2 ; // Larger nodes
+             }  
+
+             update() {  
+                 if (this.x<0 || this.x >canvas.width) this.vx = -this.vx ;  
+                 if (this.y<0 || this.y >canvas.height) this.vy = -this.vy ;  
+                 this.x += this.vx ;  
+                 this.y += this.vy ;  
+             }  
+
+             draw() {  
+                 ctx.beginPath();  
+                 ctx.arc(this.x,this.y,this.radius ,0 ,Math.PI *2);  
+                 ctx.fillStyle ='#888'; // Grey color for nodes
+                 ctx.fill();  
+                 ctx.shadowBlur =15 ;  
+                 ctx.shadowColor ='#aaa'; // Subtle glow effect
+             }  
+         }  
+
+         const nodes = Array.from({ length :120}, () => new Node());
+
+         function animate() {  
+             ctx.clearRect(0 ,0 ,canvas.width ,canvas.height);  
+             ctx.shadowBlur =0 ;
+             
+             nodes.forEach((nodeA,i) => {   
+                 nodes.slice(i +1).forEach(nodeB => {   
+                     const dx = nodeA.x - nodeB.x ;   
+                     const dy = nodeA.y - nodeB.y ;   
+                     const distance = Math.sqrt(dx *dx + dy *dy);   
+                     if (distance<250) { // Extended connection distance
+                         ctx.beginPath();   
+                         ctx.moveTo(nodeA.x,nodeA.y);   
+                         ctx.lineTo(nodeB.x,nodeB.y);   
+                         const opacity =1 -(distance /250);   
+                         const gradient =ctx.createLinearGradient(nodeA.x,nodeA.y,nodeB.x,nodeB.y);   
+                         gradient.addColorStop(0 ,`rgba(136,136,136 ,${opacity * .8})`); // Primary grey
+                         gradient.addColorStop(1 ,`rgba(170,170,170 ,${opacity * .8})`); // Secondary grey
+                         ctx.strokeStyle =gradient ;   
+                         ctx.lineWidth=2.5 ; // Increased line thickness
+                         ctx.stroke();   
+                     }   
+                 });   
+             });
+
+             nodes.forEach(node => {   
+                node.update();   
+                node.draw();   
+             });
+
+             requestAnimationFrame(animate);   
+         }  
+
+         animate();  
+
+         // Enhanced mouse interaction
+         canvas.addEventListener('mousemove',(event) => {   
+             mouse.x=event.x ;   
+             mouse.y=event.y ;
+
+             nodes.forEach(node => {   
+                const dx=mouse.x-node.x ;   
+                const dy=mouse.y-node.y ;   
+                const distance=Math.sqrt(dx *dx + dy *dy);
+                
+                if(distance<250){ // Larger interaction radius
+                    const angle=Math.atan2(dy ,dx);
+                    const force=(250-distance)/250;
+
+                    node.vx-=Math.cos(angle)*force*1.5 ; // Stronger repulsion
+                    node.vy-=Math.sin(angle)*force*1.5 ;
+
+                    if(distance<100){ // Magnetic effect within radius of interaction
+                        ctx.beginPath();
+                        ctx.moveTo(mouse.x ,mouse.y);
+                        ctx.lineTo(node.x,node.y);
+                        ctx.strokeStyle=`rgba(136,136,136 ,0.2)` ;
+                        ctx.lineWidth=1 ;
+                        ctx.stroke();
+                    }
+                }
+             });
+         });
+
+         // Form submission handling
+         document.getElementById('interaction-form').addEventListener('submit', async function(e) {
+             e.preventDefault();
+
+             const drug1Data = {
+                 cyp3a4: document.getElementById('drug1_cyp3a4').value,
+                 bindingAffinity: document.getElementById('drug1_binding_affinity').value,
+                 renalClearance: document.getElementById('drug1_renal_clearance').value,
+                 logp: document.getElementById('drug1_logp').value
+             };
+
+             const drug2Data = {
+                 cyp3a4: document.getElementById('drug2_cyp3a4').value,
+                 bindingAffinity: document.getElementById('drug2_binding_affinity').value,
+                 renalClearance: document.getElementById('drug2_renal_clearance').value,
+                 logp: document.getElementById('drug2_logp').value
+             };
+
+             try {
+                 const response = await fetch('http://localhost:5000/predict', {
+                     method: 'POST',
+                     headers: {
+                         'Content-Type': 'application/json',
+                     },
+                     body: JSON.stringify({ drug1: drug1Data, drug2: drug2Data })
+                 });
+
+                 const result = await response.json();
+                 
+                 if (result.error) {
+                     throw new Error(result.error);
+                 }
+
+                 // Display result on the page
+                 document.getElementById('result').style.display = 'block';
+                 document.getElementById('interaction-description').textContent = result.message;
+
+                 // Save to history
+                 const historyItem = {
+                     timestamp: new Date().toLocaleString(),
+                     drug1: drug1Data,
+                     drug2: drug2Data,
+                     result: result.message
+                 };
+
+                 // Get existing history
+                 let history = JSON.parse(localStorage.getItem('drugInteractionHistory') || '[]');
+                 
+                 // Add new interaction to the beginning of the array
+                 history.unshift(historyItem);
+                 
+                 // Keep only the last 5 interactions
+                 history = history.slice(0, 5);
+                 
+                 // Save back to localStorage
+                 localStorage.setItem('drugInteractionHistory', JSON.stringify(history));
+
+             } catch (error) {
+                 alert('Error occurred while predicting interaction. ' + error.message);
+             }
+         });
+     </script>
+
+</body>    
+</html>    
