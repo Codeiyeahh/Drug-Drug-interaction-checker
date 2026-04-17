@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DDI Checker — Drug-Drug Interaction Predictor</title>
+  <meta name="description" content="AI-powered drug-drug interaction checker using pharmacological parameters and a trained neural network.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">D-D Interaction Checker <span>v1.0</span></a>
+    <ul class="navbar-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/index">Checker</a></li>
+      <li><a href="/index#samples">Samples</a></li>
+      <li><a href="/library">Library</a></li>
+      <li><a href="/about">About</a></li>
+    </ul>
+  </nav>
+
+  <div class="hero-center">
+    <h1 class="hero-title">D-D Interaction<br><span class="gradient-text">Checker</span></h1>
+    <p class="hero-sub">Predict adverse drug-drug interactions using pharmacokinetic parameters powered by a trained deep learning model.</p>
+    <div class="hero-cta">
+      <a href="/index" class="btn btn-primary">Start Checking →</a>
+      <a href="/index#samples" class="btn btn-secondary" style="margin-left: 1rem; width: auto; padding: 0.9rem 2rem;">Drug Samples</a>
+    </div>
+    <div class="hero-pills">
+      <span class="hero-pill"><span class="dot"></span>CYP3A4 Metabolism</span>
+      <span class="hero-pill"><span class="dot"></span>Binding Affinity</span>
+      <span class="hero-pill"><span class="dot"></span>Renal Clearance</span>
+      <span class="hero-pill"><span class="dot"></span>LogP</span>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='canvas.js') }}"></script>
+</body>
+</html>

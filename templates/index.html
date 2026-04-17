@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Check Interaction — DDI Checker</title>
+  <meta name="description" content="Enter pharmacological parameters for two drugs to predict their interaction risk.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+
+  <div class="page-wrapper">
+    <!-- Navbar -->
+    <nav class="navbar">
+      <a href="/" class="navbar-brand">D-D Interaction Checker <span>v1.0</span></a>
+      <ul class="navbar-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/index" class="active">Checker</a></li>
+        <li><a href="/library">Library</a></li>
+        <li><a href="/about">About</a></li>
+      </ul>
+    </nav>
+
+    <main class="main-content">
+      <div class="page-header">
+        <h1>Check Drug Interaction</h1>
+        <p>Enter the pharmacokinetic parameters for both drugs below.</p>
+      </div>
+
+      <div class="card">
+        <form id="interaction-form" novalidate>
+          <div class="drugs-wrapper">
+
+            <!-- Drug 1 -->
+            <div class="drug-card">
+              <h3><span class="drug-badge">1</span> Drug A</h3>
+
+              <div class="form-group">
+                <label for="drug1_cyp3a4">CYP3A4 Enzyme Type</label>
+                <select id="drug1_cyp3a4" name="drug1_cyp3a4" required>
+                  <option value="" disabled selected>Select type…</option>
+                  <option value="0">0 — Non-substrate</option>
+                  <option value="1">1 — Substrate</option>
+                  <option value="2">2 — Inhibitor</option>
+                  <option value="3">3 — Inducer</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="drug1_binding_affinity">Binding Affinity (nM)</label>
+                <input type="number" step="any" id="drug1_binding_affinity" name="drug1_binding_affinity"
+                       placeholder="e.g. 150.5" required>
+              </div>
+
+              <div class="form-group">
+                <label for="drug1_renal_clearance">Renal Clearance (mL/min/kg)</label>
+                <input type="number" step="any" id="drug1_renal_clearance" name="drug1_renal_clearance"
+                       placeholder="e.g. 1.2" required>
+              </div>
+
+              <div class="form-group">
+                <label for="drug1_logp">LogP (lipophilicity)</label>
+                <input type="number" step="any" id="drug1_logp" name="drug1_logp"
+                       placeholder="e.g. 2.4" required>
+              </div>
+            </div>
+
+            <!-- Drug 2 -->
+            <div class="drug-card">
+              <h3><span class="drug-badge">2</span> Drug B</h3>
+
+              <div class="form-group">
+                <label for="drug2_cyp3a4">CYP3A4 Enzyme Type</label>
+                <select id="drug2_cyp3a4" name="drug2_cyp3a4" required>
+                  <option value="" disabled selected>Select type…</option>
+                  <option value="0">0 — Non-substrate</option>
+                  <option value="1">1 — Substrate</option>
+                  <option value="2">2 — Inhibitor</option>
+                  <option value="3">3 — Inducer</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="drug2_binding_affinity">Binding Affinity (nM)</label>
+                <input type="number" step="any" id="drug2_binding_affinity" name="drug2_binding_affinity"
+                       placeholder="e.g. 320.0" required>
+              </div>
+
+              <div class="form-group">
+                <label for="drug2_renal_clearance">Renal Clearance (mL/min/kg)</label>
+                <input type="number" step="any" id="drug2_renal_clearance" name="drug2_renal_clearance"
+                       placeholder="e.g. 0.9" required>
+              </div>
+
+              <div class="form-group">
+                <label for="drug2_logp">LogP (lipophilicity)</label>
+                <input type="number" step="any" id="drug2_logp" name="drug2_logp"
+                       placeholder="e.g. 3.1" required>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="submit-btn">
+            Predict Interaction
+          </button>
+        </form>
+
+        <!-- Result Panel -->
+        <div id="result-panel">
+          <div class="result-card" id="result-card">
+            <div class="result-header">
+              <span class="result-icon" id="result-icon"></span>
+              <div>
+                <div class="result-title" id="result-title"></div>
+              </div>
+            </div>
+            <p class="result-message" id="result-message"></p>
+            <div class="prob-bar-wrap">
+              <div class="prob-bar-fill" id="prob-bar" style="width:0%"></div>
+            </div>
+            <div class="prob-label">
+              <span>Interaction probability</span>
+              <span class="prob-value" id="prob-value">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sample Drug Section -->
+      <section id="samples" style="margin-top: 3rem;">
+        <div class="page-header" style="text-align: left; margin-bottom: 1.5rem;">
+          <h2 style="font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; color: var(--primary);">🧪 Sample Drug Datasheets</h2>
+          <p>Quickly test the model using these common pharmaceutical parameters.</p>
+        </div>
+        
+        <div class="history-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+          <!-- Ketoconazole -->
+          <div class="history-item">
+            <div class="history-item-header">
+              <div class="history-meta">
+                <span class="history-index" style="background: var(--danger-dim); color: var(--danger);">Inhibitor</span>
+                <span style="font-weight: 700;">Ketoconazole</span>
+              </div>
+            </div>
+            <div class="history-drug-params" style="font-size: 0.85rem; padding: 0.5rem 0;">
+                CYP3A4: 2 (Inhibitor)<br>
+                Binding: 1.2 nM<br>
+                Renal CL: 0.1 mL/min/kg<br>
+                LogP: 3.7
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+              <button class="btn btn-ghost" style="flex: 1; padding: 0.4rem; font-size: 0.75rem;" onclick="applySample('Ketoconazole', 2, 1.2, 0.1, 3.7, 1)">Apply A</button>
+              <button class="btn btn-ghost" style="flex: 1; padding: 0.4rem; font-size: 0.75rem;" onclick="applySample('Ketoconazole', 2, 1.2, 0.1, 3.7, 2)">Apply B</button>
+            </div>
+          </div>
+
+          <!-- Rifampicin -->
+          <div class="history-item">
+            <div class="history-item-header">
+              <div class="history-meta">
+                <span class="history-index" style="background: rgba(155, 119, 245, 0.12); color: #b09cff;">Inducer</span>
+                <span style="font-weight: 700;">Rifampicin</span>
+              </div>
+            </div>
+            <div class="history-drug-params" style="font-size: 0.85rem; padding: 0.5rem 0;">
+                CYP3A4: 3 (Inducer)<br>
+                Binding: 850 nM<br>
+                Renal CL: 0.5 mL/min/kg<br>
+                LogP: 4.2
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+              <button class="btn btn-ghost" style="flex: 1; padding: 0.4rem; font-size: 0.75rem;" onclick="applySample('Rifampicin', 3, 850, 0.5, 4.2, 1)">Apply A</button>
+              <button class="btn btn-ghost" style="flex: 1; padding: 0.4rem; font-size: 0.75rem;" onclick="applySample('Rifampicin', 3, 850, 0.5, 4.2, 2)">Apply B</button>
+            </div>
+          </div>
+
+          <!-- Simvastatin -->
+          <div class="history-item">
+            <div class="history-item-header">
+              <div class="history-meta">
+                <span class="history-index">Substrate</span>
+                <span style="font-weight: 700;">Simvastatin</span>
+              </div>
+            </div>
+            <div class="history-drug-params" style="font-size: 0.85rem; padding: 0.5rem 0;">
+                CYP3A4: 1 (Substrate)<br>
+                Binding: 145 nM<br>
+                Renal CL: 0.2 mL/min/kg<br>
+                LogP: 4.6
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+              <button class="btn btn-ghost" style="flex: 1; padding: 0.4rem; font-size: 0.75rem;" onclick="applySample('Simvastatin', 1, 145, 0.2, 4.6, 1)">Apply A</button>
+              <button class="btn btn-ghost" style="flex: 1; padding: 0.4rem; font-size: 0.75rem;" onclick="applySample('Simvastatin', 1, 145, 0.2, 4.6, 2)">Apply B</button>
+            </div>
+          </div>
+
+          <!-- Midazolam -->
+          <div class="history-item">
+            <div class="history-item-header">
+              <div class="history-meta">
+                <span class="history-index">Substrate</span>
+                <span style="font-weight: 700;">Midazolam</span>
+              </div>
+            </div>
+            <div class="history-drug-params" style="font-size: 0.85rem; padding: 0.5rem 0;">
+                CYP3A4: 1 (Substrate)<br>
+                Binding: 420 nM<br>
+                Renal CL: 0.8 mL/min/kg<br>
+                LogP: 3.3
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+              <button class="btn btn-ghost" style="flex: 1; padding: 0.4rem; font-size: 0.75rem;" onclick="applySample('Midazolam', 1, 420, 0.8, 3.3, 1)">Apply A</button>
+              <button class="btn btn-ghost" style="flex: 1; padding: 0.4rem; font-size: 0.75rem;" onclick="applySample('Midazolam', 1, 420, 0.8, 3.3, 2)">Apply B</button>
+            </div>
+          </div>
+
+          <!-- Ritonavir -->
+          <div class="history-item">
+            <div class="history-item-header">
+              <div class="history-meta">
+                <span class="history-index" style="background: var(--danger-dim); color: var(--danger);">Strong Inhibitor</span>
+                <span style="font-weight: 700;">Ritonavir</span>
+              </div>
+            </div>
+            <div class="history-drug-params" style="font-size: 0.85rem; padding: 0.5rem 0;">
+                CYP3A4: 2 (Inhibitor)<br>
+                Binding: 0.01 nM<br>
+                Renal CL: 0.05 mL/min/kg<br>
+                LogP: 3.9
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+              <button class="btn btn-ghost" style="flex: 1; padding: 0.4rem; font-size: 0.75rem;" onclick="applySample('Ritonavir', 2, 0.01, 0.05, 3.9, 1)">Apply A</button>
+              <button class="btn btn-ghost" style="flex: 1; padding: 0.4rem; font-size: 0.75rem;" onclick="applySample('Ritonavir', 2, 0.01, 0.05, 3.9, 2)">Apply B</button>
+            </div>
+          </div>
+
+          <!-- Phenytoin -->
+          <div class="history-item">
+            <div class="history-item-header">
+              <div class="history-meta">
+                <span class="history-index" style="background: rgba(155, 119, 245, 0.12); color: #b09cff;">Inducer</span>
+                <span style="font-weight: 700;">Phenytoin</span>
+              </div>
+            </div>
+            <div class="history-drug-params" style="font-size: 0.85rem; padding: 0.5rem 0;">
+                CYP3A4: 3 (Inducer)<br>
+                Binding: 1200 nM<br>
+                Renal CL: 0.4 mL/min/kg<br>
+                LogP: 2.4
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+              <button class="btn btn-ghost" style="flex: 1; padding: 0.4rem; font-size: 0.75rem;" onclick="applySample('Phenytoin', 3, 1200, 0.4, 2.4, 1)">Apply A</button>
+              <button class="btn btn-ghost" style="flex: 1; padding: 0.4rem; font-size: 0.75rem;" onclick="applySample('Phenytoin', 3, 1200, 0.4, 2.4, 2)">Apply B</button>
+            </div>
+          </div>
+
+          <!-- Cyclosporine -->
+          <div class="history-item">
+            <div class="history-item-header">
+              <div class="history-meta">
+                <span class="history-index">Substrate</span>
+                <span style="font-weight: 700;">Cyclosporine</span>
+              </div>
+            </div>
+            <div class="history-drug-params" style="font-size: 0.85rem; padding: 0.5rem 0;">
+                CYP3A4: 1 (Substrate)<br>
+                Binding: 85 nM<br>
+                Renal CL: 0.08 mL/min/kg<br>
+                LogP: 2.9
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+              <button class="btn btn-ghost" style="flex: 1; padding: 0.4rem; font-size: 0.75rem;" onclick="applySample('Cyclosporine', 1, 85, 0.08, 2.9, 1)">Apply A</button>
+              <button class="btn btn-ghost" style="flex: 1; padding: 0.4rem; font-size: 0.75rem;" onclick="applySample('Cyclosporine', 1, 85, 0.08, 2.9, 2)">Apply B</button>
+            </div>
+          </div>
+
+          <!-- Clarithromycin -->
+          <div class="history-item">
+            <div class="history-item-header">
+              <div class="history-meta">
+                <span class="history-index" style="background: var(--danger-dim); color: var(--danger);">Inhibitor</span>
+                <span style="font-weight: 700;">Clarithromycin</span>
+              </div>
+            </div>
+            <div class="history-drug-params" style="font-size: 0.85rem; padding: 0.5rem 0;">
+                CYP3A4: 2 (Inhibitor)<br>
+                Binding: 15 nM<br>
+                Renal CL: 0.9 mL/min/kg<br>
+                LogP: 3.2
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+              <button class="btn btn-ghost" style="flex: 1; padding: 0.4rem; font-size: 0.75rem;" onclick="applySample('Clarithromycin', 2, 15, 0.9, 3.2, 1)">Apply A</button>
+              <button class="btn btn-ghost" style="flex: 1; padding: 0.4rem; font-size: 0.75rem;" onclick="applySample('Clarithromycin', 2, 15, 0.9, 3.2, 2)">Apply B</button>
+            </div>
+          </div>
+
+          <!-- St. John's Wort -->
+          <div class="history-item">
+            <div class="history-item-header">
+              <div class="history-meta">
+                <span class="history-index" style="background: rgba(155, 119, 245, 0.12); color: #b09cff;">Inducer</span>
+                <span style="font-weight: 700;">St. John's Wort</span>
+              </div>
+            </div>
+            <div class="history-drug-params" style="font-size: 0.85rem; padding: 0.5rem 0;">
+                CYP3A4: 3 (Inducer)<br>
+                Binding: 2500 nM<br>
+                Renal CL: 0.3 mL/min/kg<br>
+                LogP: 3.5
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+              <button class="btn btn-ghost" style="flex: 1; padding: 0.4rem; font-size: 0.75rem;" onclick="applySample('Hyperforin', 3, 2500, 0.3, 3.5, 1)">Apply A</button>
+              <button class="btn btn-ghost" style="flex: 1; padding: 0.4rem; font-size: 0.75rem;" onclick="applySample('Hyperforin', 3, 2500, 0.3, 3.5, 2)">Apply B</button>
+            </div>
+          </div>
+
+          <!-- Atorvastatin -->
+          <div class="history-item">
+            <div class="history-item-header">
+              <div class="history-meta">
+                <span class="history-index">Substrate</span>
+                <span style="font-weight: 700;">Atorvastatin</span>
+              </div>
+            </div>
+            <div class="history-drug-params" style="font-size: 0.85rem; padding: 0.5rem 0;">
+                CYP3A4: 1 (Substrate)<br>
+                Binding: 110 nM<br>
+                Renal CL: 0.05 mL/min/kg<br>
+                LogP: 4.1
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+              <button class="btn btn-ghost" style="flex: 1; padding: 0.4rem; font-size: 0.75rem;" onclick="applySample('Atorvastatin', 1, 110, 0.05, 4.1, 1)">Apply A</button>
+              <button class="btn btn-ghost" style="flex: 1; padding: 0.4rem; font-size: 0.75rem;" onclick="applySample('Atorvastatin', 1, 110, 0.05, 4.1, 2)">Apply B</button>
+            </div>
+          </div>
+
+          <!-- Caffeine -->
+          <div class="history-item">
+            <div class="history-item-header">
+              <div class="history-meta">
+                <span class="history-index" style="background: var(--success-dim); color: var(--primary);">Non-Substrate</span>
+                <span style="font-weight: 700;">Caffeine</span>
+              </div>
+            </div>
+            <div class="history-drug-params" style="font-size: 0.85rem; padding: 0.5rem 0;">
+                CYP3A4: 0 (Non-substrate)<br>
+                Binding: 15000 nM<br>
+                Renal CL: 2.1 mL/min/kg<br>
+                LogP: -0.1
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+              <button class="btn btn-ghost" style="flex: 1; padding: 0.4rem; font-size: 0.75rem;" onclick="applySample('Caffeine', 0, 15000, 2.1, -0.1, 1)">Apply A</button>
+              <button class="btn btn-ghost" style="flex: 1; padding: 0.4rem; font-size: 0.75rem;" onclick="applySample('Caffeine', 0, 15000, 2.1, -0.1, 2)">Apply B</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="{{ url_for('static', filename='canvas.js') }}"></script>
+  <script>
+    function applySample(name, cyp, bind, renal, logp, target) {
+      const prefix = `drug${target}_`;
+      document.getElementById(`${prefix}cyp3a4`).value = cyp;
+      document.getElementById(`${prefix}binding_affinity`).value = bind;
+      document.getElementById(`${prefix}renal_clearance`).value = renal;
+      document.getElementById(`${prefix}logp`).value = logp;
+      
+      // Visual feedback
+      const card = document.querySelectorAll('.drug-card')[target-1];
+      card.style.borderColor = 'var(--primary)';
+      card.style.transform = 'scale(1.02)';
+      setTimeout(() => {
+        card.style.borderColor = 'var(--border)';
+        card.style.transform = 'scale(1)';
+      }, 300);
+    }
+    const form = document.getElementById('interaction-form');
+    const submitBtn = document.getElementById('submit-btn');
+    const resultPanel = document.getElementById('result-panel');
+    const resultCard = document.getElementById('result-card');
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      // Validate
+      const fields = form.querySelectorAll('[required]');
+      let valid = true;
+      fields.forEach(f => {
+        if (f.value === '' || f.value === null) {
+          f.classList.add('invalid');
+          valid = false;
+        } else {
+          f.classList.remove('invalid');
+        }
+      });
+      if (!valid) return;
+
+      // Loading state
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span> Analysing…';
+
+      const drug1Data = {
+        cyp3a4: document.getElementById('drug1_cyp3a4').value,
+        bindingAffinity: document.getElementById('drug1_binding_affinity').value,
+        renalClearance: document.getElementById('drug1_renal_clearance').value,
+        logp: document.getElementById('drug1_logp').value
+      };
+
+      const drug2Data = {
+        cyp3a4: document.getElementById('drug2_cyp3a4').value,
+        bindingAffinity: document.getElementById('drug2_binding_affinity').value,
+        renalClearance: document.getElementById('drug2_renal_clearance').value,
+        logp: document.getElementById('drug2_logp').value
+      };
+
+      try {
+        const response = await fetch('/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ drug1: drug1Data, drug2: drug2Data })
+        });
+
+        const result = await response.json();
+        if (result.error) throw new Error(result.error);
+
+        const pct = (result.probability * 100).toFixed(1);
+        const isInteraction = result.interaction === 1;
+
+        // Update result card
+        resultCard.className = 'result-card ' + (isInteraction ? 'danger' : 'safe');
+        document.getElementById('result-icon').textContent = isInteraction ? '⚠️' : '✅';
+        document.getElementById('result-title').textContent = isInteraction
+          ? 'Interaction Detected'
+          : 'No Significant Interaction';
+        document.getElementById('result-message').textContent = result.message;
+        document.getElementById('prob-value').textContent = pct + '%';
+
+        // Animate bar
+        requestAnimationFrame(() => {
+          document.getElementById('prob-bar').style.width = pct + '%';
+        });
+
+        resultPanel.style.display = 'block';
+
+        // Save to history
+        const histItem = {
+          timestamp: new Date().toLocaleString(),
+          drug1: drug1Data,
+          drug2: drug2Data,
+          result: result.message,
+          probability: pct,
+          interaction: isInteraction
+        };
+        let history = JSON.parse(localStorage.getItem('ddiHistory') || '[]');
+        history.unshift(histItem);
+        history = history.slice(0, 10);
+        localStorage.setItem('ddiHistory', JSON.stringify(history));
+
+        resultPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      } catch (err) {
+        alert('Error: ' + err.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Predict Interaction';
+      }
+    });
+
+    // Remove invalid class on input
+    form.querySelectorAll('input, select').forEach(el => {
+      el.addEventListener('input', () => el.classList.remove('invalid'));
+    });
+  </script>
+</body>
+</html>

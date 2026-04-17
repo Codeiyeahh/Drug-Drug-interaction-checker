@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interaction Library — DDI Checker</title>
+  <meta name="description" content="View your recent drug-drug interaction check history.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+
+  <div class="page-wrapper">
+    <nav class="navbar">
+      <a href="/" class="navbar-brand">D-D Interaction Checker <span>v1.0</span></a>
+      <ul class="navbar-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/index">Checker</a></li>
+        <li><a href="/index#samples">Samples</a></li>
+        <li><a href="/library" class="active">Library</a></li>
+        <li><a href="/about">About</a></li>
+      </ul>
+    </nav>
+
+    <main class="main-content">
+      <div class="page-header">
+        <h1>Interaction Library</h1>
+        <p>Your last 10 drug interaction checks, stored locally.</p>
+      </div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+          <span id="history-count" style="font-size:0.85rem; color:var(--text-muted);"></span>
+          <button class="btn btn-ghost" id="clear-all-btn" onclick="clearAll()" style="display:none;">
+            🗑 Clear All
+          </button>
+        </div>
+
+        <div id="history-container" class="history-grid"></div>
+
+        <div style="margin-top:1.5rem; text-align:center;">
+          <a href="/index" class="btn btn-secondary">← Back to Checker</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="{{ url_for('static', filename='canvas.js') }}"></script>
+  <script>
+    function deleteItem(index) {
+      let history = JSON.parse(localStorage.getItem('ddiHistory') || '[]');
+      history.splice(index, 1);
+      localStorage.setItem('ddiHistory', JSON.stringify(history));
+      render();
+    }
+
+    function clearAll() {
+      if (confirm('Clear all interaction history?')) {
+        localStorage.removeItem('ddiHistory');
+        render();
+      }
+    }
+
+    const cypLabels = ['Non-substrate', 'Substrate', 'Inhibitor', 'Inducer'];
+
+    function render() {
+      const container = document.getElementById('history-container');
+      const history = JSON.parse(localStorage.getItem('ddiHistory') || '[]');
+      const countEl = document.getElementById('history-count');
+      const clearBtn = document.getElementById('clear-all-btn');
+
+      countEl.textContent = history.length
+        ? `${history.length} record${history.length > 1 ? 's' : ''} found`
+        : '';
+      clearBtn.style.display = history.length ? 'inline-flex' : 'none';
+
+      if (history.length === 0) {
+        container.innerHTML = `
+          <div class="history-empty">
+            <div class="empty-icon">🔬</div>
+            <p>No interaction history yet.</p>
+            <a href="/index" class="btn btn-primary" style="width:auto; margin-top:1rem; padding: 0.7rem 1.8rem;">
+              Run your first check
+            </a>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = '';
+      history.forEach((item, i) => {
+        const isInteraction = item.interaction;
+        const chipClass = isInteraction ? 'danger' : 'safe';
+        const chipIcon = isInteraction ? '⚠️' : '✅';
+
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        div.innerHTML = `
+          <div class="history-item-header">
+            <div class="history-meta">
+              <span class="history-index">#${i + 1}</span>
+              <span class="history-date">${item.timestamp}</span>
+            </div>
+            <button class="btn-danger-ghost" onclick="deleteItem(${i})" title="Delete">×</button>
+          </div>
+          <div class="history-drugs">
+            <div>
+              <div class="history-drug-label">Drug A</div>
+              <div class="history-drug-params">
+                CYP3A4: ${cypLabels[item.drug1.cyp3a4] || item.drug1.cyp3a4}<br>
+                Binding: ${item.drug1.bindingAffinity} nM<br>
+                Renal CL: ${item.drug1.renalClearance} mL/min/kg<br>
+                LogP: ${item.drug1.logp}
+              </div>
+            </div>
+            <div>
+              <div class="history-drug-label" style="color:#b09cff;">Drug B</div>
+              <div class="history-drug-params">
+                CYP3A4: ${cypLabels[item.drug2.cyp3a4] || item.drug2.cyp3a4}<br>
+                Binding: ${item.drug2.bindingAffinity} nM<br>
+                Renal CL: ${item.drug2.renalClearance} mL/min/kg<br>
+                LogP: ${item.drug2.logp}
+              </div>
+            </div>
+          </div>
+          <div class="history-result-row">
+            <span class="result-chip ${chipClass}">${chipIcon} ${item.result}</span>
+            ${item.probability ? `<span style="margin-left:auto; font-size:0.78rem; color:var(--text-muted);">${item.probability}% probability</span>` : ''}
+          </div>`;
+        container.appendChild(div);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', render);
+  </script>
+</body>
+</html>

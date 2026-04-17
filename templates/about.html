@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About — DDI Checker</title>
+  <meta name="description" content="About the DDI Checker team and the project.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+
+  <div class="page-wrapper">
+    <nav class="navbar">
+      <a href="/" class="navbar-brand">D-D Interaction Checker <span>v1.0</span></a>
+      <ul class="navbar-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/index">Checker</a></li>
+        <li><a href="/index#samples">Samples</a></li>
+        <li><a href="/library">Library</a></li>
+        <li><a href="/about" class="active">About</a></li>
+      </ul>
+    </nav>
+
+    <main class="main-content" style="max-width:860px;">
+      <div class="about-hero">
+        <h1>About Us</h1>
+        <p>This tool was built as an academic project to explore machine learning applications in pharmacology and drug safety.</p>
+      </div>
+
+      <!-- Team -->
+      <div class="team-grid">
+        <div class="team-card" style="animation: fadeUp 0.5s 0.1s ease both;">
+          <div class="team-avatar">DN</div>
+          <div class="team-name">Dev Naik</div>
+          <div class="team-roll">23BHI10131</div>
+        </div>
+        <div class="team-card" style="animation: fadeUp 0.5s 0.2s ease both;">
+          <div class="team-avatar">OS</div>
+          <div class="team-name">Ojasvi Sahu</div>
+          <div class="team-roll">23BHI10120</div>
+        </div>
+      </div>
+
+      <!-- Drug Reference Table -->
+      <div class="card" style="margin-top:2rem;">
+        <h2 style="font-family:var(--font-display); font-size:1.1rem; margin-bottom:1rem; color:var(--primary);">🧪 Reference Drug Datasheets</h2>
+        <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1.5rem;">Use these common pharmaceutical values to explore predicted drug-drug interactions.</p>
+        
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; color: var(--text);">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--border); text-align: left; color: var(--text-muted);">
+                <th style="padding: 10px;">Drug Name</th>
+                <th style="padding: 10px;">CYP3A4 Type</th>
+                <th style="padding: 10px;">Binding Affinity</th>
+                <th style="padding: 10px;">Renal Clearance</th>
+                <th style="padding: 10px;">LogP</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 10px; font-weight: 600;">Ketoconazole</td>
+                <td style="padding: 10px;">2 (Inhibitor)</td>
+                <td style="padding: 10px;">1.2 nM</td>
+                <td style="padding: 10px;">0.1 mL/min/kg</td>
+                <td style="padding: 10px;">3.7</td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 10px; font-weight: 600;">Rifampicin</td>
+                <td style="padding: 10px;">3 (Inducer)</td>
+                <td style="padding: 10px;">850 nM</td>
+                <td style="padding: 10px;">0.5 mL/min/kg</td>
+                <td style="padding: 10px;">4.2</td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 10px; font-weight: 600;">Simvastatin</td>
+                <td style="padding: 10px;">1 (Substrate)</td>
+                <td style="padding: 10px;">145 nM</td>
+                <td style="padding: 10px;">0.2 mL/min/kg</td>
+                <td style="padding: 10px;">4.6</td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 10px; font-weight: 600;">Midazolam</td>
+                <td style="padding: 10px;">1 (Substrate)</td>
+                <td style="padding: 10px;">420 nM</td>
+                <td style="padding: 10px;">0.8 mL/min/kg</td>
+                <td style="padding: 10px;">3.3</td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 10px; font-weight: 600;">Ritonavir</td>
+                <td style="padding: 10px;">2 (Inhibitor)</td>
+                <td style="padding: 10px;">0.01 nM</td>
+                <td style="padding: 10px;">0.05 mL/min/kg</td>
+                <td style="padding: 10px;">3.9</td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 10px; font-weight: 600;">Phenytoin</td>
+                <td style="padding: 10px;">3 (Inducer)</td>
+                <td style="padding: 10px;">1200 nM</td>
+                <td style="padding: 10px;">0.4 mL/min/kg</td>
+                <td style="padding: 10px;">2.4</td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 10px; font-weight: 600;">Cyclosporine</td>
+                <td style="padding: 10px;">1 (Substrate)</td>
+                <td style="padding: 10px;">85 nM</td>
+                <td style="padding: 10px;">0.08 mL/min/kg</td>
+                <td style="padding: 10px;">2.9</td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 10px; font-weight: 600;">Clarithromycin</td>
+                <td style="padding: 10px;">2 (Inhibitor)</td>
+                <td style="padding: 10px;">15 nM</td>
+                <td style="padding: 10px;">0.9 mL/min/kg</td>
+                <td style="padding: 10px;">3.2</td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 10px; font-weight: 600;">St. John's Wort</td>
+                <td style="padding: 10px;">3 (Inducer)</td>
+                <td style="padding: 10px;">2500 nM</td>
+                <td style="padding: 10px;">0.3 mL/min/kg</td>
+                <td style="padding: 10px;">3.5</td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 10px; font-weight: 600;">Atorvastatin</td>
+                <td style="padding: 10px;">1 (Substrate)</td>
+                <td style="padding: 10px;">110 nM</td>
+                <td style="padding: 10px;">0.05 mL/min/kg</td>
+                <td style="padding: 10px;">4.1</td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 10px; font-weight: 600;">Caffeine</td>
+                <td style="padding: 10px;">0 (Non)</td>
+                <td style="padding: 10px;">15000 nM</td>
+                <td style="padding: 10px;">2.1 mL/min/kg</td>
+                <td style="padding: 10px;">-0.1</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px; font-weight: 600;">Fluconazole</td>
+                <td style="padding: 10px;">2 (Inhibitor)</td>
+                <td style="padding: 10px;">2100 nM</td>
+                <td style="padding: 10px;">0.15 mL/min/kg</td>
+                <td style="padding: 10px;">0.5</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Model Info -->
+      <div class="card" style="margin-top:1.5rem;">
+        <h2 style="font-family:var(--font-display); font-size:1.1rem; margin-bottom:1rem; color:var(--primary);">🧠 About the Model</h2>
+        <p style="color:var(--text-muted); font-size:0.9rem; line-height:1.8;">
+          The prediction engine uses a <strong style="color:var(--text);">Feedforward Neural Network (FNN)</strong> trained on a one-hot-encoded pharmacological dataset.
+          It takes 14 input features — CYP3A4 enzyme classification (4-class one-hot) and three continuous parameters per drug —
+          and outputs an interaction probability via a sigmoid-activated output layer.
+          The model was trained using PyTorch and is served via a Flask REST API.
+        </p>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-top:1.25rem;">
+          <div style="background:var(--surface-hover); border:1px solid var(--border); border-radius:var(--radius-sm); padding:1rem; text-align:center;">
+            <div style="font-size:1.4rem; margin-bottom:0.3rem;">🏗️</div>
+            <div style="font-size:0.8rem; color:var(--text-muted);">Architecture</div>
+            <div style="font-size:0.9rem; font-weight:600;">64 → 32 → 1</div>
+          </div>
+          <div style="background:var(--surface-hover); border:1px solid var(--border); border-radius:var(--radius-sm); padding:1rem; text-align:center;">
+            <div style="font-size:1.4rem; margin-bottom:0.3rem;">📥</div>
+            <div style="font-size:0.8rem; color:var(--text-muted);">Input Features</div>
+            <div style="font-size:0.9rem; font-weight:600;">14 parameters</div>
+          </div>
+          <div style="background:var(--surface-hover); border:1px solid var(--border); border-radius:var(--radius-sm); padding:1rem; text-align:center;">
+            <div style="font-size:1.4rem; margin-bottom:0.3rem;">🎯</div>
+            <div style="font-size:0.8rem; color:var(--text-muted);">Activation</div>
+            <div style="font-size:0.9rem; font-weight:600;">ReLU + Sigmoid</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align:center; margin-top:2rem;">
+        <a href="/index" class="btn btn-primary" style="width:auto; padding:0.85rem 2.5rem;">Try the Checker →</a>
+      </div>
+    </main>
+  </div>
+
+  <script src="{{ url_for('static', filename='canvas.js') }}"></script>
+</body>
+</html>
