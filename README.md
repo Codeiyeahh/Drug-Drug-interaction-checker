@@ -87,8 +87,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Team
 
+- **Soham Jagtap* (23BHI10157)
 - **Dev Naik** (23BHI10131)
 - **Ojasvi Sahu** (23BHI10120)
+
 
 ---
 
